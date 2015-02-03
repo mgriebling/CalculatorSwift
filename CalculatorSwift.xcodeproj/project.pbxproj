@@ -77,10 +77,8 @@
 		2FEDCE2C1A80F7D2006FD4AC /* CalculatorSwift */ = {
 			isa = PBXGroup;
 			children = (
-				2FEDCE2F1A80F7D2006FD4AC /* AppDelegate.swift */,
 				2FEDCE311A80F7D2006FD4AC /* ViewController.swift */,
 				2FEDCE331A80F7D2006FD4AC /* Main.storyboard */,
-				2FEDCE361A80F7D2006FD4AC /* Images.xcassets */,
 				2FEDCE381A80F7D2006FD4AC /* LaunchScreen.xib */,
 				2FEDCE2D1A80F7D2006FD4AC /* Supporting Files */,
 			);
@@ -90,6 +88,8 @@
 		2FEDCE2D1A80F7D2006FD4AC /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				2FEDCE361A80F7D2006FD4AC /* Images.xcassets */,
+				2FEDCE2F1A80F7D2006FD4AC /* AppDelegate.swift */,
 				2FEDCE2E1A80F7D2006FD4AC /* Info.plist */,
 			);
 			name = "Supporting Files";
