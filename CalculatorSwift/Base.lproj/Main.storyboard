@@ -202,9 +202,12 @@
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="F01-hd-BzP">
                                 <rect key="frame" x="24" y="482" width="104" height="110"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="32"/>
-                                <state key="normal">
+                                <state key="normal" title=".">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
+                                <connections>
+                                    <action selector="addDigit:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="gO2-pa-lXh"/>
+                                </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="EaY-3M-BTf">
                                 <rect key="frame" x="136" y="482" width="104" height="110"/>
@@ -219,11 +222,11 @@
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bsM-qm-4Tq">
                                 <rect key="frame" x="248" y="482" width="104" height="110"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="32"/>
-                                <state key="normal" title=".">
+                                <state key="normal" title="⏎">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
-                                    <action selector="addDigit:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="rhr-rJ-qNO"/>
+                                    <action selector="enterKeyPressed:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="muT-c6-Hak"/>
                                 </connections>
                             </button>
                         </subviews>
