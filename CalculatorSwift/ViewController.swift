@@ -11,103 +11,98 @@ import UIKit
 class ViewController: UIViewController {
 
 	@IBOutlet weak var display: UILabel!
-
 	@IBOutlet weak var stackDisplay: UILabel!
 	
-	var stack : [Double] = []
+	var stack = [Double]()		// value stack
+	var entries = [String]()	// used for history entries
+	
 	var inMiddleOfNumberEntry = false
-	var decimalEntered = false
+	var numberFormatter = NSNumberFormatter()
+	
+	var displayValue : Double? {
+		get {
+			if let number = numberFormatter.numberFromString(display.text!) {
+				return number.doubleValue
+			} else {
+				return nil
+			}
+		}
+		set {
+			if newValue == nil {
+				display.text = ""
+			} else {
+				display.text = "\(newValue!)"
+			}
+			inMiddleOfNumberEntry = false
+		}
+	}
 
 	@IBAction func addDigit(sender: UIButton) {
-		let digit = sender.titleLabel!.text!
-		
-		// check if "0" in display needs to be cleared
-		if !inMiddleOfNumberEntry { display.text! = "" }
-		inMiddleOfNumberEntry = true
+		let digit = sender.currentTitle!
 		
 		// check for valid floating point number construction
-		if digit == "." {
-			if decimalEntered {return} // ignore two or more decimals
-			decimalEntered = true
+		if digit == "." && display.text!.rangeOfString(".") != nil {
+			return // ignore two or more decimals
 		}
-
-		display.text! += digit
+		
+		// check if "0" in display needs to be cleared
+		if !inMiddleOfNumberEntry {
+			display.text = digit
+			inMiddleOfNumberEntry = true
+		} else {
+			display.text! += digit
+		}
 	}
 	
-	override func viewDidAppear(animated: Bool) {
-		super.viewDidAppear(animated)
-		clearState(UIButton())
-	}
-	
-	func performOperation (op : (arg1 : Double, arg2 : Double) -> Double) {
+	func performOperation (op : (Double, Double) -> Double) {
 		if stack.count >= 2 {
-			let number1 = stack.removeLast()
-			let number2 = stack.removeLast()
-			enterNumberOnStack(op(arg1: number1, arg2: number2))
+			displayValue = op(stack.removeLast(), stack.removeLast())
+			enterKeyPressed()
 		}
 	}
 	
-	func performOperation (op : (arg : Double) -> Double) {
+	func performOperation (op : Double -> Double) {
 		if stack.count >= 1 {
-			let number = stack.removeLast()
-			enterNumberOnStack(op(arg: number))
+			displayValue = op(stack.removeLast())
+			enterKeyPressed()
 		}
 	}
 
 	@IBAction func calculate(sender: UIButton) {
-		let operation = sender.titleLabel!.text!
-		if inMiddleOfNumberEntry {enterKeyPressed(UIButton())}
-		switch operation {
+		if inMiddleOfNumberEntry {enterKeyPressed()}
+		
+		if let operation = sender.currentTitle {
+			entries.append(operation)
+			switch operation {
 			case "+" : performOperation({$0 + $1})
 			case "−" : performOperation({$1 - $0})
 			case "×" : performOperation({$0 * $1})
 			case "÷" : performOperation({$1 / $0})
-			case "sin" : performOperation({sin($0)})
-			case "cos" : performOperation({cos($0)})
-			case "π" : enterNumberOnStack(M_PI)
-			default : break
+			case "√" : performOperation(sqrt)
+			case "sin" : performOperation(sin)
+			case "cos" : performOperation(cos)
+			case "π" : displayValue = M_PI; enterKeyPressed()
+			default : entries.removeLast() // ignore illegal entry
+			}
 		}
-		if stack.last != nil {display.text! = "\(stack.last!)"}
 	}
 	
-	func displayStack () {
-		if stack.isEmpty {stackDisplay.text! = "Stack: Empty"}
-		else {stackDisplay.text! = "Stack: \(stack)"}
-	}
-	
-	func enterNumberOnStack (number : Double) {
-		stack.append(number)
+	@IBAction func enterKeyPressed() {
 		inMiddleOfNumberEntry = false
-		decimalEntered = false
-		displayStack()
+		if displayValue != nil {
+			stack.append(displayValue!)
+			entries.append("\(displayValue!)")
+		}
+		println("stack = \(stack)")
+		stackDisplay.text = "History: \(entries)"
 	}
 	
-	@IBAction func enterKeyPressed(sender: UIButton) {
-		let number = NSNumberFormatter().numberFromString(display.text!)?.doubleValue
-		if (number != nil) {enterNumberOnStack(number!)}
-	}
-	
-//	@IBAction func addConstant(sender: UIButton) {
-//		let digit = sender.titleLabel!.text!
-//		
-//		// enter any number already in the display
-//		if inMiddleOfNumberEntry {enterKeyPressed(sender)}
-//		
-//		// display the constant
-//		addDigit(sender)
-//		
-//		// put the constant on the stack
-//		switch digit {
-//						default : break
-//		}
-//	}
-	
-	@IBAction func clearState(sender: UIButton) {
-		display.text! = "0"
-		inMiddleOfNumberEntry = false
-		decimalEntered = false
-		stack = []
-		displayStack()
+	@IBAction func clearState() {
+		displayValue = 0
+		stack = [Double]()
+		entries = [String]()
+		println("stack = \(stack)")
+		stackDisplay.text = "History: \(entries)"
 	}
 }
 
