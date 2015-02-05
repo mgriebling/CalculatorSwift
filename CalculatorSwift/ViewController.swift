@@ -54,9 +54,18 @@ class ViewController: UIViewController {
 		}
 	}
 	
+	func addEqual () {
+		if let position = find(entries, "=") {
+			// remove any existing "="s
+			removeAtIndex(&entries, position)
+		}
+		entries.append("=")
+	}
+	
 	func performOperation (op : (Double, Double) -> Double) {
 		if stack.count >= 2 {
 			displayValue = op(stack.removeLast(), stack.removeLast())
+			addEqual()
 			enterKeyPressed()
 		}
 	}
@@ -64,12 +73,14 @@ class ViewController: UIViewController {
 	func performOperation (op : Double -> Double) {
 		if stack.count >= 1 {
 			displayValue = op(stack.removeLast())
+			addEqual()
 			enterKeyPressed()
 		}
 	}
 	
 	func pushConstant (const: Double) {
 		displayValue = const
+		addEqual()
 		enterKeyPressed()
 	}
 
