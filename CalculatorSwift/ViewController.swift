@@ -67,6 +67,11 @@ class ViewController: UIViewController {
 			enterKeyPressed()
 		}
 	}
+	
+	func pushConstant (const: Double) {
+		displayValue = const
+		enterKeyPressed()
+	}
 
 	@IBAction func calculate(sender: UIButton) {
 		if inMiddleOfNumberEntry {enterKeyPressed()}
@@ -74,17 +79,43 @@ class ViewController: UIViewController {
 		if let operation = sender.currentTitle {
 			entries.append(operation)
 			switch operation {
-			case "+" : performOperation({$0 + $1})
-			case "−" : performOperation({$1 - $0})
-			case "×" : performOperation({$0 * $1})
-			case "÷" : performOperation({$1 / $0})
-			case "√" : performOperation(sqrt)
-			case "sin" : performOperation(sin)
-			case "cos" : performOperation(cos)
-			case "π" : displayValue = M_PI; enterKeyPressed()
-			default : entries.removeLast() // ignore illegal entry
+			case "+"	: performOperation({$0 + $1})
+			case "−"	: performOperation({$1 - $0})
+			case "×"	: performOperation({$0 * $1})
+			case "÷"	: performOperation({$1 / $0})
+			case "√"	: performOperation(sqrt)
+			case "sin"	: performOperation(sin)
+			case "cos"	: performOperation(cos)
+			case "π"	: pushConstant(M_PI)
+			default		: break
 			}
 		}
+	}
+	
+	@IBAction func backspace() {
+		if inMiddleOfNumberEntry {
+			if countElements(display.text!) > 1 {
+				display.text = dropLast(display.text!)
+			} else {
+				display.text = "0"
+				inMiddleOfNumberEntry = false
+			}
+		}
+	}
+	
+	@IBAction func negate() {
+		if inMiddleOfNumberEntry {
+			if display.text!.hasPrefix("-") {
+				display.text = dropFirst(display.text!)
+			} else {
+				display.text = "-" + display.text!
+			}
+		} else {
+			entries.append("±")
+			performOperation({-$0})
+		}
+		println("stack = \(stack)")
+		stackDisplay.text = "History: \(entries)"
 	}
 	
 	@IBAction func enterKeyPressed() {
@@ -98,7 +129,7 @@ class ViewController: UIViewController {
 	}
 	
 	@IBAction func clearState() {
-		displayValue = 0
+		display.text = "0"
 		stack = [Double]()
 		entries = [String]()
 		println("stack = \(stack)")
