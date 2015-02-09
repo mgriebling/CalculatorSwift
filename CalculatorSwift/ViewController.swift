@@ -64,6 +64,19 @@ class ViewController: UIViewController {
 			}
 		}
 	}
+	@IBAction func addVariable(sender: UIButton) {
+		if inMiddleOfNumberEntry {enterKeyPressed()}
+		if let variable = sender.currentTitle {
+			displayValue = brain.pushOperand(variable)
+		}
+	}
+	
+	@IBAction func setVariable(sender: UIButton) {
+		var varName = sender.currentTitle!
+		inMiddleOfNumberEntry = false
+		brain.variableValues[dropFirst(varName)] = displayValue
+		displayValue = brain.evaluate()
+	}
 	
 	@IBAction func addConstant(sender: UIButton) {
 		if inMiddleOfNumberEntry {enterKeyPressed()}

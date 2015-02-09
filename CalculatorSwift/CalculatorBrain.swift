@@ -44,8 +44,7 @@ class CalculatorBrain {
 		if s.hasPrefix("(") && s.hasSuffix(")") {
 			var str = s;
 			removeLast(&str)
-			str.removeAtIndex(str.startIndex)
-			return str
+			return dropFirst(str)
 		}
 		return s
 	}
