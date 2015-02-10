@@ -52,24 +52,24 @@ class CalculatorBrain {
 	var variableValues = [String: Double]()
 	private var constantValues = [String: Double]()
 	
-	private func removeBraces (s: String) -> String {
-		if s.hasPrefix("(") && s.hasSuffix(")") {
-			var str = s;
-			removeLast(&str)
-			return dropFirst(str)
-		}
-		return s
-	}
+//	private func removeBraces (s: String) -> String {
+//		if s.hasPrefix("(") && s.hasSuffix(")") {
+//			var str = s;
+//			removeLast(&str)
+//			return dropFirst(str)
+//		}
+//		return s
+//	}
 	
 	var description : String {
 		
 		var (result, remainder, _) = describe(opStack)
 		if let ans = result {
-			var total = removeBraces(ans)
+			var total = ans
 			while remainder.count > 0 {
 				(result, remainder, _) = describe(remainder)
 				if let ans2 = result {
-					total += "," + removeBraces(ans2)
+					total = ans2 + "," + total
 				}
 			}
 			return total + "="
@@ -88,7 +88,7 @@ class CalculatorBrain {
 				let value = describe(remainingOps)
 				if let operand = value.result {
 					let ops = operation == "±" ? "−" : operation // substitue "-" for "±"
-					return (ops + "(" + removeBraces(operand) + ")", value.remainingOps, op.precedence)
+					return (ops + "(" + operand + ")", value.remainingOps, op.precedence)
 				}
 			case .BinaryOperation(let operation, _, let precedence):
 				let op1Evaluation = describe(remainingOps)
@@ -189,6 +189,15 @@ class CalculatorBrain {
 	func pushConstant(name: String) -> Double? {
 		opStack.append(Op.Constant(name))
 		return evaluate()
+	}
+	
+	func popStack () -> Double? {
+		if opStack.count == 0 {return nil}
+		let op = opStack.removeLast()
+		switch op {
+		case .Operand(let val): return val
+		default: return nil
+		}
 	}
 	
 	func performOperation(symbol: String) -> Double? {

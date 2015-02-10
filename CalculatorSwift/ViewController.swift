@@ -56,14 +56,23 @@ class ViewController: UIViewController {
 	}
 	
 	@IBAction func backspace() {
-		if inMiddleOfNumberEntry {
-			if countElements(display.text!) > 1 {
-				display.text = dropLast(display.text!)
+		if inMiddleOfNumberEntry && countElements(display.text!) > 1 {
+			display.text = dropLast(display.text!)
+		} else {
+			if var number = brain.popStack()?.description {
+				inMiddleOfNumberEntry = true
+				if number.hasSuffix(".0") {
+					removeLast(&number)
+					removeLast(&number)
+				}
+				display.text = number
+				stackDisplay.text = brain.description
 			} else {
-				clearState()
+				displayValue = brain.evaluate()
 			}
 		}
 	}
+	
 	@IBAction func addVariable(sender: UIButton) {
 		if inMiddleOfNumberEntry {enterKeyPressed()}
 		if let variable = sender.currentTitle {
