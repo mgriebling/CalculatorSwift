@@ -13,7 +13,7 @@ class CalculatorBrain {
 	private enum Op: Printable {
 		case Operand(Double)
 		case UnaryOperation(String, Double -> Double)
-		case BinaryOperation(String, (Double, Double) -> Double)
+		case BinaryOperation(String, (Double, Double) -> Double, Int)
 		case Constant(String)
 		case VarOperand(String)
 		
@@ -24,13 +24,25 @@ class CalculatorBrain {
 					return "\(operand)"
 				case .UnaryOperation(let symbol, _):
 					return symbol
-				case .BinaryOperation(let symbol, _):
+				case .BinaryOperation(let symbol, _, _):
 					return symbol
 				case .Constant(let symbol):
 					return symbol
 				case .VarOperand(let varString):
 					return varString
 				}
+			}
+		}
+		
+		var precedence: Int {
+			get {
+				switch self {
+				case .BinaryOperation(let op, _, let precedence):
+					return precedence
+				default:
+					return Int.max   // default (highest) precedence for most things
+				}
+				
 			}
 		}
 	}
@@ -51,11 +63,11 @@ class CalculatorBrain {
 	
 	var description : String {
 		
-		var (result, remainder) = describe(opStack)
+		var (result, remainder, _) = describe(opStack)
 		if let ans = result {
 			var total = removeBraces(ans)
 			while remainder.count > 0 {
-				(result, remainder) = describe(remainder)
+				(result, remainder, _) = describe(remainder)
 				if let ans2 = result {
 					total += "," + removeBraces(ans2)
 				}
@@ -65,39 +77,47 @@ class CalculatorBrain {
 		return " "
 	}
 	
-	private func describe (ops: [Op]) -> (result: String?, remainingOps: [Op]) {
+	private func describe (ops: [Op]) -> (result: String?, remainingOps: [Op], precedence: Int) {
 		if !ops.isEmpty {
 			var remainingOps = ops
 			let op = remainingOps.removeLast()
 			switch op {
 			case .Operand(let operand):
-				return (operand.description, remainingOps)
+				return (operand.description, remainingOps, op.precedence)
 			case .UnaryOperation(let operation, _):
 				let value = describe(remainingOps)
 				if let operand = value.result {
-					let op = operation == "±" ? "−" : operation // substitue "-" for "±"
-					return (op + "(" + removeBraces(operand) + ")", value.remainingOps)
+					let ops = operation == "±" ? "−" : operation // substitue "-" for "±"
+					return (ops + "(" + removeBraces(operand) + ")", value.remainingOps, op.precedence)
 				}
-			case .BinaryOperation(let operation, _):
+			case .BinaryOperation(let operation, _, let precedence):
 				let op1Evaluation = describe(remainingOps)
 				if let operand1 = op1Evaluation.result {
-					var result = operation + operand1
+					var result = operand1
+					if op1Evaluation.precedence < precedence {
+						// add braces around lower precedence expressions
+						result = "(" + result + ")"
+					}
+					result = operation + result
 					let op2Evaluation = describe(op1Evaluation.remainingOps)
 					if let operand2 = op2Evaluation.result {
-						result = operand2 + result
+						if op2Evaluation.precedence < precedence {
+							result = "(" + operand2 + ")" + result
+						} else {
+							result = operand2 + result
+						}
 					} else {
 						result = "?" + result
 					}
-					result = "(" + removeBraces(result) + ")"
-					return (result, op2Evaluation.remainingOps)
+					return (result, op2Evaluation.remainingOps, precedence)
 				}
 			case .Constant(let constant):
-				return (constant, remainingOps)
+				return (constant, remainingOps, op.precedence)
 			case .VarOperand(let variable):
-				return (variable, remainingOps)
+				return (variable, remainingOps, op.precedence)
 			}
 		}
-		return (nil, ops)
+		return (nil, ops, 0)
 	}
 	
 	init () {
@@ -105,10 +125,10 @@ class CalculatorBrain {
 			knownOps[op.description] = op
 		}
 		
-		learnOp(Op.BinaryOperation("×", *))
-		learnOp(Op.BinaryOperation("+", +))
-		learnOp(Op.BinaryOperation("−"){$1 - $0})
-		learnOp(Op.BinaryOperation("÷"){$1 / $0})
+		learnOp(Op.BinaryOperation("×", *, 20))
+		learnOp(Op.BinaryOperation("+", +, 10))
+		learnOp(Op.BinaryOperation("−", {$1 - $0}, 10))
+		learnOp(Op.BinaryOperation("÷", {$1 / $0}, 20))
 		learnOp(Op.UnaryOperation("√", sqrt))
 		learnOp(Op.UnaryOperation("±", {0 - $0}))
 		learnOp(Op.UnaryOperation("sin", sin))
@@ -129,7 +149,7 @@ class CalculatorBrain {
 				if let operand = operandEvaluation.result {
 					return (operation(operand), operandEvaluation.remainingOps)
 				}
-			case .BinaryOperation(_, let operation):
+			case .BinaryOperation(_, let operation, _):
 				let op1Evaluation = evaluate(remainingOps)
 				if let operand1 = op1Evaluation.result {
 					let op2Evaluation = evaluate(op1Evaluation.remainingOps)
