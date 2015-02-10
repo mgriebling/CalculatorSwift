@@ -12,8 +12,8 @@ class CalculatorBrain {
 	
 	private enum Op: Printable {
 		case Operand(Double)
-		case UnaryOperation(String, Double -> Double)
-		case BinaryOperation(String, (Double, Double) -> Double, Int)
+		case UnaryOperation(String, Double -> Double, (Double -> String?)?)
+		case BinaryOperation(String, (Double, Double) -> Double, Int, ((Double, Double) -> String?)?)
 		case Constant(String)
 		case VarOperand(String)
 		
@@ -22,9 +22,9 @@ class CalculatorBrain {
 				switch self {
 				case .Operand(let operand):
 					return "\(operand)"
-				case .UnaryOperation(let symbol, _):
+				case .UnaryOperation(let symbol, _, _):
 					return symbol
-				case .BinaryOperation(let symbol, _, _):
+				case .BinaryOperation(let symbol, _, _, _):
 					return symbol
 				case .Constant(let symbol):
 					return symbol
@@ -37,7 +37,7 @@ class CalculatorBrain {
 		var precedence: Int {
 			get {
 				switch self {
-				case .BinaryOperation(let op, _, let precedence):
+				case .BinaryOperation(let op, _, let precedence, _):
 					return precedence
 				default:
 					return Int.max   // default (highest) precedence for most things
@@ -74,13 +74,13 @@ class CalculatorBrain {
 			switch op {
 			case .Operand(let operand):
 				return (operand.description, remainingOps, op.precedence)
-			case .UnaryOperation(let operation, _):
+			case .UnaryOperation(let operation, _, _):
 				let value = describe(remainingOps)
 				if let operand = value.result {
 					let ops = operation == "±" ? "−" : operation // substitue "-" for "±"
 					return (ops + "(" + operand + ")", value.remainingOps, op.precedence)
 				}
-			case .BinaryOperation(let operation, _, let precedence):
+			case .BinaryOperation(let operation, _, let precedence, _):
 				let op1Evaluation = describe(remainingOps)
 				if let operand1 = op1Evaluation.result {
 					var result = operand1
@@ -110,19 +110,29 @@ class CalculatorBrain {
 		return (nil, ops, 0)
 	}
 	
+	private func divisionChecks (arg1: Double, arg2: Double) -> String? {
+		if arg1 == 0 { return "Division by zero" }
+		return nil
+	}
+	
+	private func squareRootChecks (arg: Double) -> String? {
+		if arg < 0 { return "Square root of a negative number" }
+		return nil
+	}
+	
 	init () {
 		func learnOp (op: Op) {
 			knownOps[op.description] = op
 		}
 		
-		learnOp(Op.BinaryOperation("×", *, 20))
-		learnOp(Op.BinaryOperation("+", +, 10))
-		learnOp(Op.BinaryOperation("−", {$1 - $0}, 10))
-		learnOp(Op.BinaryOperation("÷", {$1 / $0}, 20))
-		learnOp(Op.UnaryOperation("√", sqrt))
-		learnOp(Op.UnaryOperation("±", {0 - $0}))
-		learnOp(Op.UnaryOperation("sin", sin))
-		learnOp(Op.UnaryOperation("cos", cos))
+		learnOp(Op.BinaryOperation("×", *, 20, nil))
+		learnOp(Op.BinaryOperation("+", +, 10, nil))
+		learnOp(Op.BinaryOperation("−", {$1 - $0}, 10, nil))
+		learnOp(Op.BinaryOperation("÷", {$1 / $0}, 20, divisionChecks))
+		learnOp(Op.UnaryOperation("√", sqrt, squareRootChecks))
+		learnOp(Op.UnaryOperation("±", {0 - $0}, nil))
+		learnOp(Op.UnaryOperation("sin", sin, nil))
+		learnOp(Op.UnaryOperation("cos", cos, nil))
 		
 		constantValues["π"] = M_PI
 	}
@@ -134,12 +144,12 @@ class CalculatorBrain {
 			switch op {
 			case .Operand(let operand):
 				return (operand, remainingOps)
-			case .UnaryOperation(_, let operation):
+			case .UnaryOperation(_, let operation, _):
 				let operandEvaluation = evaluate(remainingOps)
 				if let operand = operandEvaluation.result {
 					return (operation(operand), operandEvaluation.remainingOps)
 				}
-			case .BinaryOperation(_, let operation, _):
+			case .BinaryOperation(_, let operation, _, _):
 				let op1Evaluation = evaluate(remainingOps)
 				if let operand1 = op1Evaluation.result {
 					let op2Evaluation = evaluate(op1Evaluation.remainingOps)
@@ -164,6 +174,47 @@ class CalculatorBrain {
 		let (result, remainder) = evaluate(opStack)
 		println("\(opStack) = \(result) with \(remainder) left over")
 		return result
+	}
+	
+	private func evaluateAndReportErrors(ops: [Op]) -> (result: Double?, error: String?, remainingOps: [Op]) {
+		if !ops.isEmpty {
+			var remainingOps = ops
+			let op = remainingOps.removeLast()
+			switch op {
+			case .Operand(let operand):
+				return (operand, "", remainingOps)
+			case .UnaryOperation(_, let operation, _):
+				let operandEvaluation = evaluateAndReportErrors(remainingOps)
+				if let operand = operandEvaluation.result {
+					if let error = operandEvaluation.error {
+						return (operation(operand), error, operandEvaluation.remainingOps)
+					} else {
+						
+					}
+				}
+			case .BinaryOperation(_, let operation, _, _):
+				let op1Evaluation = evaluate(remainingOps)
+				if let operand1 = op1Evaluation.result {
+					let op2Evaluation = evaluate(op1Evaluation.remainingOps)
+					if let operand2 = op2Evaluation.result {
+						return (operation(operand1, operand2), op2Evaluation.remainingOps)
+					}
+				}
+			case .Constant(let constant):
+				if let varValue = constantValues[constant] {
+					return (varValue, remainingOps)
+				}
+			case .VarOperand(let variable):
+				if let varValue = variableValues[variable] {
+					return (varValue, remainingOps)
+				}
+			}
+		}
+	}
+	
+	func evaluateAndReportErrors() -> String? {
+
+		return ""
 	}
 	
 	func pushOperand(operand: Double) -> Double? {
@@ -197,3 +248,4 @@ class CalculatorBrain {
 		return evaluate()
 	}
 }
+
