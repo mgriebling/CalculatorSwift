@@ -52,17 +52,7 @@ class CalculatorBrain {
 	var variableValues = [String: Double]()
 	private var constantValues = [String: Double]()
 	
-//	private func removeBraces (s: String) -> String {
-//		if s.hasPrefix("(") && s.hasSuffix(")") {
-//			var str = s;
-//			removeLast(&str)
-//			return dropFirst(str)
-//		}
-//		return s
-//	}
-	
 	var description : String {
-		
 		var (result, remainder, _) = describe(opStack)
 		if let ans = result {
 			var total = ans

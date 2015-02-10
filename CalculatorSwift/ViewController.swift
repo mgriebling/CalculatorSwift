@@ -59,14 +59,9 @@ class ViewController: UIViewController {
 		if inMiddleOfNumberEntry && countElements(display.text!) > 1 {
 			display.text = dropLast(display.text!)
 		} else {
-			if var number = brain.popStack()?.description {
+			if var number = brain.popStack() {
+				displayValue = number
 				inMiddleOfNumberEntry = true
-				if number.hasSuffix(".0") {
-					removeLast(&number)
-					removeLast(&number)
-				}
-				display.text = number
-				stackDisplay.text = brain.description
 			} else {
 				displayValue = brain.evaluate()
 			}
