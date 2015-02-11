@@ -183,38 +183,54 @@ class CalculatorBrain {
 			switch op {
 			case .Operand(let operand):
 				return (operand, "", remainingOps)
-			case .UnaryOperation(_, let operation, _):
+			case .UnaryOperation(let opName, let operation, let errorFunction):
 				let operandEvaluation = evaluateAndReportErrors(remainingOps)
 				if let operand = operandEvaluation.result {
 					if let error = operandEvaluation.error {
 						return (operation(operand), error, operandEvaluation.remainingOps)
-					} else {
-						
+					} else if let error = errorFunction?(operand) {
+						return (operation(operand), error, operandEvaluation.remainingOps)
 					}
+				} else {
+					return (0, "Insufficient arguments for " + opName, operandEvaluation.remainingOps)
 				}
-			case .BinaryOperation(_, let operation, _, _):
+			case .BinaryOperation(let opName, let operation, _, let errorFunction):
 				let op1Evaluation = evaluate(remainingOps)
 				if let operand1 = op1Evaluation.result {
-					let op2Evaluation = evaluate(op1Evaluation.remainingOps)
+					let op2Evaluation = evaluateAndReportErrors(op1Evaluation.remainingOps)
 					if let operand2 = op2Evaluation.result {
-						return (operation(operand1, operand2), op2Evaluation.remainingOps)
+						if let error = op2Evaluation.error {
+							return (operation(operand1, operand2), error, op2Evaluation.remainingOps)
+						} else if let error = errorFunction?(operand1, operand2) {
+							return (operation(operand1, operand2), error, op2Evaluation.remainingOps)
+						}
+					} else {
+						return (0, "Insufficient arguments for " + opName, op2Evaluation.remainingOps)
 					}
+				} else {
+					return (0, "Insufficient arguments for " + opName, op1Evaluation.remainingOps)
 				}
 			case .Constant(let constant):
 				if let varValue = constantValues[constant] {
-					return (varValue, remainingOps)
+					return (varValue, nil, remainingOps)
+				} else {
+					return (0, "Undefined constant " + constant, remainingOps)
 				}
 			case .VarOperand(let variable):
 				if let varValue = variableValues[variable] {
-					return (varValue, remainingOps)
+					return (varValue, nil, remainingOps)
+				} else {
+					return (0, "Undefined variable " + variable, remainingOps)
 				}
 			}
 		}
+		return (nil, nil, ops)
 	}
 	
 	func evaluateAndReportErrors() -> String? {
-
-		return ""
+		if opStack.isEmpty { return "Nothing to evaluate" }
+		let (_, error, _) = evaluateAndReportErrors(opStack)
+		return error
 	}
 	
 	func pushOperand(operand: Double) -> Double? {

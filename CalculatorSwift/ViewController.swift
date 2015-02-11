@@ -24,7 +24,7 @@ class ViewController: UIViewController {
 			if let disp = newValue {
 				display.text = "\(disp)"
 			} else {
-				display.text = " "
+				display.text = brain.evaluateAndReportErrors()
 			}
 			inMiddleOfNumberEntry = false
 			stackDisplay.text = brain.description
