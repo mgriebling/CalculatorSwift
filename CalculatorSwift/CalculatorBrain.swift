@@ -111,12 +111,12 @@ class CalculatorBrain {
 	}
 	
 	private func divisionChecks (arg1: Double, arg2: Double) -> String? {
-		if arg1 == 0 { return "Division by zero" }
+		if arg1.isZero { return "Division by zero" }
 		return nil
 	}
 	
 	private func squareRootChecks (arg: Double) -> String? {
-		if arg < 0 { return "Square root of a negative number" }
+		if arg < 0 { return "Negative square root" }
 		return nil
 	}
 	
@@ -171,8 +171,15 @@ class CalculatorBrain {
 	}
 	
 	func evaluate() -> Double? {
-		let (result, remainder) = evaluate(opStack)
-		println("\(opStack) = \(result) with \(remainder) left over")
+	//	let (result, remainder) = evaluate(opStack)
+		let (result, error, remainder) = evaluateAndReportErrors(opStack)
+
+		if error != nil {
+			println("Error = " + error!)
+			return nil;
+		} else {
+			println("\(opStack) = \(result) with \(remainder) left over")
+		}
 		return result
 	}
 	
@@ -182,33 +189,37 @@ class CalculatorBrain {
 			let op = remainingOps.removeLast()
 			switch op {
 			case .Operand(let operand):
-				return (operand, "", remainingOps)
+				return (operand, nil, remainingOps)
 			case .UnaryOperation(let opName, let operation, let errorFunction):
 				let operandEvaluation = evaluateAndReportErrors(remainingOps)
 				if let operand = operandEvaluation.result {
+					var outError : String? = nil
 					if let error = operandEvaluation.error {
-						return (operation(operand), error, operandEvaluation.remainingOps)
-					} else if let error = errorFunction?(operand) {
-						return (operation(operand), error, operandEvaluation.remainingOps)
+						outError = error
+					} else if let error2 = errorFunction?(operand) {
+						outError = error2
 					}
+					return (operation(operand), outError, operandEvaluation.remainingOps)
 				} else {
 					return (0, "Insufficient arguments for " + opName, operandEvaluation.remainingOps)
 				}
 			case .BinaryOperation(let opName, let operation, _, let errorFunction):
-				let op1Evaluation = evaluate(remainingOps)
+				let op1Evaluation = evaluateAndReportErrors(remainingOps)
 				if let operand1 = op1Evaluation.result {
 					let op2Evaluation = evaluateAndReportErrors(op1Evaluation.remainingOps)
 					if let operand2 = op2Evaluation.result {
+						var outError : String? = nil
 						if let error = op2Evaluation.error {
-							return (operation(operand1, operand2), error, op2Evaluation.remainingOps)
-						} else if let error = errorFunction?(operand1, operand2) {
-							return (operation(operand1, operand2), error, op2Evaluation.remainingOps)
+							outError = error
+						} else if let error2 = errorFunction?(operand1, operand2) {
+							outError = error2
 						}
+						return (operation(operand1, operand2), outError, op2Evaluation.remainingOps)
 					} else {
-						return (0, "Insufficient arguments for " + opName, op2Evaluation.remainingOps)
+						return (0, "Too few operands for " + opName, op2Evaluation.remainingOps)
 					}
 				} else {
-					return (0, "Insufficient arguments for " + opName, op1Evaluation.remainingOps)
+					return (0, "Too few operands for " + opName, op1Evaluation.remainingOps)
 				}
 			case .Constant(let constant):
 				if let varValue = constantValues[constant] {
