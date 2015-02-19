@@ -14,6 +14,7 @@
 		2FEDCE371A80F7D2006FD4AC /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2FEDCE361A80F7D2006FD4AC /* Images.xcassets */; };
 		2FEDCE3A1A80F7D2006FD4AC /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2FEDCE381A80F7D2006FD4AC /* LaunchScreen.xib */; };
 		2FEDCE461A80F7D2006FD4AC /* CalculatorSwiftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FEDCE451A80F7D2006FD4AC /* CalculatorSwiftTests.swift */; };
+		47C7BBE91A95FBED00712A03 /* AxesDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47C7BBE81A95FBED00712A03 /* AxesDrawer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,6 +39,7 @@
 		2FEDCE3F1A80F7D2006FD4AC /* CalculatorSwiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CalculatorSwiftTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2FEDCE441A80F7D2006FD4AC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2FEDCE451A80F7D2006FD4AC /* CalculatorSwiftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorSwiftTests.swift; sourceTree = "<group>"; };
+		47C7BBE81A95FBED00712A03 /* AxesDrawer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AxesDrawer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,6 +81,7 @@
 		2FEDCE2C1A80F7D2006FD4AC /* CalculatorSwift */ = {
 			isa = PBXGroup;
 			children = (
+				47C7BBE81A95FBED00712A03 /* AxesDrawer.swift */,
 				2FEDCE311A80F7D2006FD4AC /* ViewController.swift */,
 				2FD95CC51A83A56000F339F9 /* CalculatorBrain.swift */,
 				2FEDCE331A80F7D2006FD4AC /* Main.storyboard */,
@@ -216,6 +219,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2FD95CC61A83A56000F339F9 /* CalculatorBrain.swift in Sources */,
+				47C7BBE91A95FBED00712A03 /* AxesDrawer.swift in Sources */,
 				2FEDCE321A80F7D2006FD4AC /* ViewController.swift in Sources */,
 				2FEDCE301A80F7D2006FD4AC /* AppDelegate.swift in Sources */,
 			);
