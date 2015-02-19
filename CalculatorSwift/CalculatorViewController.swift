@@ -8,13 +8,13 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class CalculatorViewController: UIViewController {
 
 	@IBOutlet weak var display: UILabel!
 	@IBOutlet weak var stackDisplay: UILabel!
 	
-	var brain = CalculatorBrain()	// calculator model
-	var inMiddleOfNumberEntry = false
+	private var brain = CalculatorBrain()	// calculator model
+	private var inMiddleOfNumberEntry = false
 	
 	var displayValue : Double? {
 		get {
