@@ -112,5 +112,17 @@ class CalculatorViewController: UIViewController {
 		display.text = "0"
 		stackDisplay.text = brain.description
 	}
+	
+	override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+		if let pvc = segue.destinationViewController as? GraphingViewController {
+			if let identifier = segue.identifier {
+				switch identifier {
+					case "showPlot": break
+					default: break
+				}
+			}
+		}
+	}
+	
 }
 

@@ -10,12 +10,20 @@ import UIKit
 
 @IBDesignable class GraphingView: UIView {
 	
-	@IBInspectable var scale : CGFloat = 1.0
+	@IBInspectable var scale : CGFloat = 1.0 {
+		didSet {
+			scale = max(scale, 0.0)
+			setNeedsDisplay()
+		}
+	}
 	
-	var axis = AxesDrawer(contentScaleFactor: 1.0)
+	var origin = CGPointZero
+	
+	private var axis = AxesDrawer(contentScaleFactor: 1.0)
 	
 	override func drawRect(rect: CGRect) {
-		axis.drawAxesInRect(rect, origin: CGPointZero, pointsPerUnit: 1)
+		axis.contentScaleFactor = self.contentScaleFactor
+		axis.drawAxesInRect(rect, origin: self.origin, pointsPerUnit: self.scale)
 	}
 	
 }
