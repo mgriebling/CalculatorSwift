@@ -18,7 +18,7 @@ class CalculatorViewController: UIViewController {
 	
 	var displayValue : Double? {
 		get {
-			return NSNumberFormatter().numberFromString(display.text!)?.doubleValue
+            return NumberFormatter().number(from: display.text!)?.doubleValue
 		}
 		set {
 			if let disp = newValue {
@@ -31,11 +31,11 @@ class CalculatorViewController: UIViewController {
 		}
 	}
 
-	@IBAction func addDigit(sender: UIButton) {
+	@IBAction func addDigit(_ sender: UIButton) {
 		let digit = sender.currentTitle!
 		
 		// check for valid floating point number construction
-		if digit == "." && display.text!.rangeOfString(".") != nil {
+        if digit == "." && display.text!.firstIndex(of: ".") != nil {
 			return // ignore two or more decimals
 		}
 		
@@ -48,7 +48,7 @@ class CalculatorViewController: UIViewController {
 		}
 	}
 
-	@IBAction func calculate(sender: UIButton) {
+	@IBAction func calculate(_ sender: UIButton) {
 		if inMiddleOfNumberEntry {enterKeyPressed()}
 		if let operation = sender.currentTitle {
 			displayValue = brain.performOperation(operation)
@@ -56,10 +56,10 @@ class CalculatorViewController: UIViewController {
 	}
 	
 	@IBAction func backspace() {
-		if inMiddleOfNumberEntry && countElements(display.text!) > 1 {
-			display.text = dropLast(display.text!)
+        if inMiddleOfNumberEntry && display.text!.count > 1 {
+            display.text = String(display.text!.dropLast())
 		} else {
-			if var number = brain.popStack() {
+            if let number = brain.popStack() {
 				displayValue = number
 				inMiddleOfNumberEntry = true
 			} else {
@@ -68,21 +68,21 @@ class CalculatorViewController: UIViewController {
 		}
 	}
 	
-	@IBAction func addVariable(sender: UIButton) {
+	@IBAction func addVariable(_ sender: UIButton) {
 		if inMiddleOfNumberEntry {enterKeyPressed()}
 		if let variable = sender.currentTitle {
 			displayValue = brain.pushOperand(variable)
 		}
 	}
 	
-	@IBAction func setVariable(sender: UIButton) {
-		var varName = sender.currentTitle!
+	@IBAction func setVariable(_ sender: UIButton) {
+        let varName = sender.currentTitle!
 		inMiddleOfNumberEntry = false
-		brain.variableValues[dropFirst(varName)] = displayValue
+        brain.variableValues[String(varName.dropFirst())] = displayValue
 		displayValue = brain.evaluate()
 	}
 	
-	@IBAction func addConstant(sender: UIButton) {
+	@IBAction func addConstant(_ sender: UIButton) {
 		if inMiddleOfNumberEntry {enterKeyPressed()}
 		if let constant = sender.currentTitle {
 			displayValue = brain.pushConstant(constant)
@@ -92,7 +92,7 @@ class CalculatorViewController: UIViewController {
 	@IBAction func negate() {
 		if inMiddleOfNumberEntry {
 			if display.text!.hasPrefix("-") {
-				display.text = dropFirst(display.text!)
+                display.text = String(display.text!.dropFirst())
 			} else {
 				display.text = "-" + display.text!
 			}
@@ -112,17 +112,17 @@ class CalculatorViewController: UIViewController {
 		display.text = "0"
 		stackDisplay.text = brain.description
 	}
-	
-	override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-		if let pvc = segue.destinationViewController as? GraphingViewController {
-			if let identifier = segue.identifier {
-				switch identifier {
-					case "showPlot": break
-					default: break
-				}
-			}
-		}
-	}
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.destination is GraphingViewController {
+            if let identifier = segue.identifier {
+                switch identifier {
+                    case "showPlot": break
+                    default: break
+                }
+            }
+        }
+    }
 	
 }
 

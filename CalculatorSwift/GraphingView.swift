@@ -21,9 +21,9 @@ import UIKit
 	
 	private var axis = AxesDrawer(contentScaleFactor: 1.0)
 	
-	override func drawRect(rect: CGRect) {
-		axis.contentScaleFactor = self.contentScaleFactor
-		axis.drawAxesInRect(rect, origin: self.origin, pointsPerUnit: self.scale)
-	}
+    override func draw(_ rect: CGRect) {
+        axis.contentScaleFactor = self.contentScaleFactor
+        axis.drawAxesInRect(rect, origin: self.origin, pointsPerUnit: self.scale)
+    }
 	
 }
